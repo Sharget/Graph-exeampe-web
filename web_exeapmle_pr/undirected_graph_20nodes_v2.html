@@ -1,0 +1,472 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  min-height: 100vh;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(89, 131, 252, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(21, 154, 120, 0.18), transparent 30%),
+    linear-gradient(135deg, #eef4fb 0%, #f7faf7 48%, #f3efe8 100%);
+  color: #163046;
+  overflow: hidden;
+}
+#app {
+  --panel-bg: rgba(255, 255, 255, 0.84);
+  --panel-border: rgba(129, 153, 182, 0.24);
+  --panel-shadow: 0 24px 60px rgba(34, 59, 89, 0.14);
+  --text-main: var(--color-text-primary, #17324a);
+  --text-soft: var(--color-text-secondary, #5c6f82);
+  --border-soft: var(--color-border-secondary, rgba(136, 154, 174, 0.28));
+  --border-strong: var(--color-border-primary, rgba(89, 112, 138, 0.46));
+  --surface: var(--color-background-primary, rgba(255, 255, 255, 0.9));
+  --surface-alt: var(--color-background-secondary, rgba(245, 248, 251, 0.9));
+  --success-bg: var(--color-background-success, rgba(29, 158, 117, 0.14));
+  --warning-bg: var(--color-background-warning, rgba(186, 117, 23, 0.14));
+  --danger-bg: var(--color-background-danger, rgba(163, 45, 45, 0.14));
+  --success-text: var(--color-text-success, #177a5c);
+  --warning-text: var(--color-text-warning, #9a6114);
+  --danger-text: var(--color-text-danger, #8c3030);
+  --info-bg: var(--color-background-info, rgba(63, 117, 214, 0.12));
+  --info-text: var(--color-text-info, #0e86ff);
+  --radius: var(--border-radius-md, 18px);
+  display: flex;
+  gap: clamp(14px, 2vw, 22px);
+  height: 100vh;
+  min-height: 0;
+  padding: clamp(14px, 2.5vh, 28px);
+}
+#sidebar {
+  width: clamp(240px, 25vw, 280px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: clamp(10px, 1.6vh, 14px);
+  padding: clamp(16px, 2.2vh, 24px) clamp(14px, 1.8vw, 20px) clamp(14px, 1.8vh, 20px);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 28px;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(18px);
+  overflow: auto;
+}
+#sidebar h2 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-soft);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.hero {
+  padding: 4px 2px 12px;
+}
+.hero h1 {
+  font-size: clamp(22px, 2.4vw, 28px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+.hero p {
+  font-size: clamp(12px, 1.15vw, 13px);
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: clamp(11px, 1.6vh, 14px) clamp(12px, 1.3vw, 14px);
+  border: 1px solid var(--border-soft);
+  border-radius: calc(var(--radius) + 2px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 249, 252, 0.86));
+  box-shadow: 0 10px 22px rgba(41, 60, 84, 0.08);
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s, box-shadow 0.18s;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.58), transparent 58%);
+  pointer-events: none;
+}
+.btn:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(241, 246, 250, 0.96));
+  border-color: var(--border-strong);
+  box-shadow: 0 16px 32px rgba(41, 60, 84, 0.12);
+  transform: translateY(-1px);
+}
+.btn:active { transform: scale(0.97); }
+.btn .label { font-size: clamp(14px, 1.2vw, 15px); font-weight: 700; color: var(--text-main); }
+.btn .desc { font-size: clamp(11px, 1vw, 12px); color: var(--text-soft); line-height: 1.4; }
+.btn .pill {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 9px;
+  border-radius: 99px;
+  margin-top: 4px;
+}
+.pill-min { background: var(--success-bg); color: var(--success-text); }
+.pill-med { background: var(--warning-bg); color: var(--warning-text); }
+.pill-max { background: var(--danger-bg); color: var(--danger-text); }
+.btn-min { border-left: 4px solid #1D9E75; }
+.btn-med { border-left: 4px solid #BA7517; }
+.btn-max { border-left: 4px solid #A32D2D; }
+#stats {
+  margin-top: auto;
+  padding: clamp(12px, 1.8vh, 16px) clamp(12px, 1.4vw, 16px);
+  background:
+    linear-gradient(180deg, rgba(246, 250, 253, 0.96), rgba(239, 245, 249, 0.92));
+  border: 1px solid rgba(129, 153, 182, 0.22);
+  border-radius: 22px;
+  font-size: clamp(12px, 1vw, 13px);
+  color: var(--text-soft);
+  line-height: 1.95;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+#stats strong { color: var(--text-main); font-weight: 700; font-size: clamp(15px, 1.5vw, 17px); }
+#canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid var(--panel-border);
+  border-radius: 30px;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(18px);
+}
+#canvas-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(84, 134, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 82% 78%, rgba(24, 155, 120, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(243, 248, 252, 0.74));
+  pointer-events: none;
+}
+svg#g { width: 100%; height: 100%; display: block; }
+.edge {
+  stroke: rgba(85, 109, 138, 0.82);
+  stroke-width: 1.8;
+  opacity: 0;
+  transition: opacity 0.4s, stroke 0.2s, stroke-width 0.2s;
+}
+.edge.visible { opacity: 1; }
+.node-circle {
+  fill: rgba(255, 255, 255, 0.92);
+  stroke: rgba(99, 122, 146, 0.68);
+  stroke-width: 2;
+  cursor: pointer;
+  filter: drop-shadow(0 10px 14px rgba(34, 57, 82, 0.12));
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.2s, stroke 0.2s, transform 0.15s, filter 0.2s;
+}
+.node-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #385066;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  user-select: none;
+}
+.node-g:hover .node-circle,
+.node-g.highlighted .node-circle {
+  fill: #8fd0ff;
+  stroke: var(--info-text);
+  stroke-width: 3;
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 0 rgba(14, 134, 255, 0.15)) drop-shadow(0 14px 24px rgba(14, 134, 255, 0.28));
+}
+.edge.highlighted { stroke: #00a6ff; stroke-width: 3.6; opacity: 1 !important; }
+#reset-btn {
+  font-size: clamp(12px, 1vw, 13px);
+  font-weight: 600;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(129, 153, 182, 0.24);
+  border-radius: 16px;
+  padding: clamp(9px, 1.4vh, 10px) 12px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s, transform 0.12s, border-color 0.15s;
+}
+#reset-btn:hover {
+  background: rgba(244, 248, 252, 0.92);
+  border-color: rgba(99, 122, 146, 0.38);
+}
+#reset-btn:active { transform: scale(0.98); }
+.canvas-caption {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 1;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(129, 153, 182, 0.24);
+  border-radius: 999px;
+  color: var(--text-soft);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(10px);
+}
+@media (max-width: 900px) {
+  body {
+    overflow: auto;
+  }
+  #app {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 18px;
+  }
+  #sidebar {
+    width: 100%;
+    overflow: visible;
+  }
+  #canvas-wrap {
+    min-height: 540px;
+  }
+}
+</style>
+
+<div id="app">
+  <div id="sidebar">
+    <div class="hero">
+      <h2>Graf neorientat</h2>
+      <h1>Explorare vizuală pentru 20 de noduri</h1>
+      <p>Alege nivelul de densitate al muchiilor și inspectează conexiunile dintre noduri printr-un aspect mai clar și mai aerisit.</p>
+    </div>
+    <div class="control-group">
+      <button class="btn btn-min" onclick="generateEdges('min')">
+        <span class="label">Minim</span>
+        <span class="desc">Arbore spanning pentru conectivitate de bază.</span>
+        <span class="pill pill-min">19 muchii</span>
+      </button>
+      <button class="btn btn-med" onclick="generateEdges('med')">
+        <span class="label">Mediu</span>
+        <span class="desc">Echilibru între lizibilitate și redundanță.</span>
+        <span class="pill pill-med">~30 muchii</span>
+      </button>
+      <button class="btn btn-max" onclick="generateEdges('max')">
+        <span class="label">Maxim</span>
+        <span class="desc">Graf dens, aproape de limita posibilă.</span>
+        <span class="pill pill-max">~40 muchii</span>
+      </button>
+    </div>
+    <button id="reset-btn" onclick="resetEdges()">↺ Resetează</button>
+    <div id="stats">
+      <strong id="stat-edges">0</strong> muchii<br>
+      <strong id="stat-density">0%</strong> din max posibil<br>
+      <span id="stat-connected" style="color: var(--color-text-danger)">Neconectat</span>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <div class="canvas-caption">Click pe un nod pentru evidențiere</div>
+    <svg id="g" viewBox="0 0 480 540">
+      <g id="edges-layer"></g>
+      <g id="nodes-layer"></g>
+    </svg>
+  </div>
+</div>
+
+<script>
+const N = 20;
+const MAX_DEG = 4;
+const CX = 240, CY = 272, R1 = 170, R2 = 90;
+
+const nodePos = [];
+for (let i = 0; i < 12; i++) {
+  const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+  nodePos.push({ x: CX + R1 * Math.cos(a), y: CY + R1 * Math.sin(a) });
+}
+for (let i = 0; i < 8; i++) {
+  const a = (i / 8) * 2 * Math.PI - Math.PI / 2;
+  nodePos.push({ x: CX + R2 * Math.cos(a), y: CY + R2 * Math.sin(a) });
+}
+
+// Max possible edges with degree constraint = 20 * 4 / 2 = 40
+const REAL_MAX = 40;
+
+let currentEdges = [];
+
+function edgeKey(u, v) { return u < v ? `${u}-${v}` : `${v}-${u}`; }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildSpanningTree(deg) {
+  const visited = new Set([0]);
+  const tree = [];
+  let remaining = shuffle([...Array(N).keys()].slice(1));
+  let attempts = 0;
+  while (remaining.length > 0 && attempts < 2000) {
+    attempts++;
+    const v = remaining.shift();
+    const candidates = shuffle([...visited]).filter(u => deg[u] < MAX_DEG && deg[v] < MAX_DEG);
+    if (candidates.length === 0) { remaining.push(v); continue; }
+    const u = candidates[0];
+    tree.push([u, v]);
+    deg[u]++; deg[v]++;
+    visited.add(v);
+  }
+  return tree;
+}
+
+function generateEdges(mode) {
+  const deg = new Array(N).fill(0);
+  const tree = buildSpanningTree(deg);
+  const usedKeys = new Set(tree.map(([u, v]) => edgeKey(u, v)));
+  let edges = [...tree];
+
+  // All possible extra edges not yet used
+  const extras = [];
+  for (let i = 0; i < N; i++)
+    for (let j = i + 1; j < N; j++)
+      if (!usedKeys.has(edgeKey(i, j))) extras.push([i, j]);
+
+  const shuffled = shuffle(extras);
+
+  let target;
+  if (mode === 'min') {
+    target = 19; // spanning tree only
+  } else if (mode === 'med') {
+    target = 30;
+  } else {
+    target = 40; // push toward real max
+  }
+
+  for (const [u, v] of shuffled) {
+    if (edges.length >= target) break;
+    if (deg[u] < MAX_DEG && deg[v] < MAX_DEG) {
+      edges.push([u, v]);
+      deg[u]++; deg[v]++;
+    }
+  }
+
+  currentEdges = edges;
+  renderEdges(edges, mode);
+  updateStats(edges.length);
+}
+
+function renderEdges(edges, mode) {
+  const layer = document.getElementById('edges-layer');
+  layer.innerHTML = '';
+  const colorMap = { min: '#0E9F6E', med: '#C77712', max: '#B83232' };
+  const color = mode ? colorMap[mode] : null;
+
+  edges.forEach(([u, v], i) => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', nodePos[u].x);
+    line.setAttribute('y1', nodePos[u].y);
+    line.setAttribute('x2', nodePos[v].x);
+    line.setAttribute('y2', nodePos[v].y);
+    line.setAttribute('class', 'edge');
+    line.setAttribute('data-u', u);
+    line.setAttribute('data-v', v);
+    if (color) line.style.stroke = color;
+    layer.appendChild(line);
+    setTimeout(() => line.classList.add('visible'), 20 + i * 14);
+  });
+}
+
+function resetEdges() {
+  currentEdges = [];
+  document.getElementById('edges-layer').innerHTML = '';
+  updateStats(0);
+  clearHighlights();
+}
+
+function updateStats(edgeCount) {
+  const density = Math.round((edgeCount / REAL_MAX) * 100);
+  document.getElementById('stat-edges').textContent = edgeCount;
+  document.getElementById('stat-density').textContent = density + '%';
+  const conn = document.getElementById('stat-connected');
+  if (edgeCount >= 19) {
+    conn.textContent = 'Conectat ✓';
+    conn.style.color = 'var(--color-text-success)';
+  } else {
+    conn.textContent = 'Neconectat';
+    conn.style.color = 'var(--color-text-danger)';
+  }
+}
+
+function highlightNode(id) {
+  clearHighlights();
+  document.querySelector(`.node-g[data-id="${id}"]`).classList.add('highlighted');
+  const neighbors = new Set();
+  document.querySelectorAll('.edge').forEach(e => {
+    const u = parseInt(e.getAttribute('data-u'));
+    const v = parseInt(e.getAttribute('data-v'));
+    if (u === id || v === id) {
+      e.classList.add('highlighted');
+      neighbors.add(u === id ? v : u);
+    }
+  });
+  neighbors.forEach(n => {
+    document.querySelector(`.node-g[data-id="${n}"]`).classList.add('highlighted');
+  });
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.node-g').forEach(g => g.classList.remove('highlighted'));
+  document.querySelectorAll('.edge').forEach(e => e.classList.remove('highlighted'));
+}
+
+function initNodes() {
+  const layer = document.getElementById('nodes-layer');
+  for (let i = 0; i < N; i++) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'node-g');
+    g.setAttribute('data-id', i);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', nodePos[i].x);
+    circle.setAttribute('cy', nodePos[i].y);
+    circle.setAttribute('r', 16);
+    circle.setAttribute('class', 'node-circle');
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', nodePos[i].x);
+    text.setAttribute('y', nodePos[i].y);
+    text.setAttribute('class', 'node-label');
+    text.textContent = i + 1;
+    g.appendChild(circle);
+    g.appendChild(text);
+    g.addEventListener('click', () => highlightNode(i));
+    layer.appendChild(g);
+  }
+}
+
+initNodes();
+updateStats(0);
+
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.node-g')) clearHighlights();
+});
+</script>

@@ -1,0 +1,407 @@
+
+<style>
+  #gc-root {
+    --gc-surface: color-mix(in srgb, var(--color-background-secondary) 76%, transparent);
+    --gc-surface-strong: color-mix(in srgb, var(--color-background-secondary) 92%, var(--color-background-primary));
+    --gc-border: color-mix(in srgb, var(--color-border-primary) 70%, transparent);
+    --gc-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 1.25rem 0 1.5rem;
+    font-family: "Segoe UI", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  }
+  .gc-shell {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--gc-border);
+    border-radius: calc(var(--border-radius-lg, 20px) + 2px);
+    padding: 1rem;
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--color-background-accent, #5ea2ff) 12%, transparent) 0, transparent 34%),
+      radial-gradient(circle at bottom right, color-mix(in srgb, var(--color-text-success, #5aa469) 10%, transparent) 0, transparent 30%),
+      var(--gc-surface);
+    box-shadow: var(--gc-shadow);
+    backdrop-filter: blur(10px);
+  }
+  .gc-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 26%);
+  }
+  .gc-title {
+    position: relative;
+    margin: 0 0 .35rem;
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    line-height: 1.2;
+    color: var(--color-text-primary);
+  }
+  .gc-subtitle {
+    position: relative;
+    margin: 0 0 1rem;
+    max-width: 62ch;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; position: relative; }
+  button.gc-btn {
+    appearance: none;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--gc-border);
+    background: var(--gc-surface-strong);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background .15s, transform .1s, border-color .15s, box-shadow .15s;
+  }
+  button.gc-btn:hover {
+    background: color-mix(in srgb, var(--color-background-secondary) 88%, white 12%);
+    border-color: color-mix(in srgb, var(--color-border-primary) 90%, white 10%);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  }
+  button.gc-btn:active { transform: scale(0.97); }
+  .info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .info-card {
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--gc-surface-strong);
+    border: 1px solid color-mix(in srgb, var(--gc-border) 82%, transparent);
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+  .info-card strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.18rem;
+    color: var(--color-text-primary);
+  }
+  .graph-card {
+    position: relative;
+    border-radius: calc(var(--border-radius-lg, 20px) - 2px);
+    border: 1px solid color-mix(in srgb, var(--gc-border) 86%, transparent);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), transparent 24%),
+      color-mix(in srgb, var(--color-background-primary) 84%, var(--color-background-secondary));
+    padding: 14px;
+  }
+  svg#graph {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .edge-line { stroke: #000000; stroke-width: 1.5; fill: none; }
+  .node-circle { cursor: pointer; stroke-width: 2; transition: filter .15s, transform .15s; transform-origin: center; }
+  .node-circle:hover { filter: brightness(1.08); }
+  .legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    align-items: center;
+    position: relative;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-background-secondary) 72%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gc-border) 70%, transparent);
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35);
+  }
+  .gc-hint {
+    margin: 12px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    position: relative;
+  }
+  @media (max-width: 640px) {
+    #gc-root { padding-top: .5rem; }
+    .gc-shell { padding: .85rem; }
+    .graph-card { padding: 10px; }
+    .info-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .gc-subtitle { font-size: 14px; }
+  }
+</style>
+<div id="gc-root">
+  <div class="gc-shell">
+    <h2 class="gc-title">Colorarea unui graf cu 7 noduri</h2>
+    <p class="gc-subtitle">
+      Vizualizarea a fost aerisită pentru a separa mai clar controalele, metadatele și graful propriu-zis. Interacțiunea rămâne aceeași.
+    </p>
+    <div class="btn-row">
+      <button class="gc-btn" onclick="setMode('min')">1 - Muchii minime </button>
+      <button class="gc-btn" onclick="setMode('med')">2 - Muchii medii</button>
+      <button class="gc-btn" onclick="setMode('max')">3 - Muchii maxime </button>
+    </div>
+    <div class="info-row">
+      <div class="info-card">Noduri: <strong>7</strong></div>
+      <div class="info-card">Muchii: <strong id="edge-count">0</strong></div>
+      <div class="info-card">Nr. cromatic: <strong id="chrom-num">—</strong></div>
+      <div class="info-card">Colorare: <strong id="valid-label">—</strong></div>
+    </div>
+    <div class="graph-card">
+      <svg id="graph" viewBox="0 0 560 380"></svg>
+    </div>
+    <div class="legend" id="legend"></div>
+    <p class="gc-hint">
+      Apasă pe un nod pentru a-i cicla culoarea prin opțiunile valide. <strong>x/5</strong> indică numărul de culori disponibile în raport cu vecinii.
+    </p>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  { name: 'Roșu',     hex: '#D85A30' },
+  { name: 'Albastru', hex: '#378ADD' },
+  { name: 'Verde',    hex: '#639922' },
+  { name: 'Violet',   hex: '#7F77DD' },
+  { name: 'Portoc.',  hex: '#EF9F27' },
+];
+const N = 7;
+
+// Hexagon + center node layout
+const cx = 280, cy = 188, r = 145;
+const positions = Array.from({length: N-1}, (_, i) => {
+  const angle = (Math.PI * 2 * i / (N-1)) - Math.PI/2;
+  return { x: Math.round(cx + r * Math.cos(angle)), y: Math.round(cy + r * Math.sin(angle)) };
+});
+positions.push({ x: cx, y: cy }); // node 6 = center
+
+// Edge sets
+function makeTree() {
+  // BFS spanning tree: center(6) connects to all outer, plus 0-1
+  return [[6,0],[6,1],[6,2],[6,3],[6,4],[6,5]]; // 6 edges
+}
+
+function makeMed() {
+  // tree + extra edges for a denser but not complete graph ~13 edges
+  return [
+    [6,0],[6,1],[6,2],[6,3],[6,4],[6,5], // center spokes
+    [0,1],[1,2],[2,3],[3,4],[4,5],[5,0], // outer ring
+    [0,3] // one diagonal
+  ];
+}
+
+function makeMax() {
+  // all edges: n*(n-1)/2 = 21
+  let e = [];
+  for (let i=0; i<N; i++) for (let j=i+1; j<N; j++) e.push([i,j]);
+  return e;
+}
+
+const EDGE_SETS = { min: makeTree(), med: makeMed(), max: makeMax() };
+
+let edges = [];
+let nodeColors = new Array(N).fill(0);
+let currentMode = 'min';
+
+function setMode(mode) {
+  currentMode = mode;
+  edges = EDGE_SETS[mode];
+  greedyColor();
+  render();
+}
+
+function greedyColor() {
+  nodeColors = new Array(N).fill(-1);
+  for (let i = 0; i < N; i++) {
+    let used = usedNeighborColors(i);
+    for (let c = 0; c < 5; c++) {
+      if (!used.has(c)) { nodeColors[i] = c; break; }
+    }
+    if (nodeColors[i] === -1) nodeColors[i] = 0;
+  }
+}
+
+function usedNeighborColors(node) {
+  let used = new Set();
+  for (let [a,b] of edges) {
+    if (a === node && nodeColors[b] >= 0) used.add(nodeColors[b]);
+    if (b === node && nodeColors[a] >= 0) used.add(nodeColors[a]);
+  }
+  return used;
+}
+
+function availableColors(node) {
+  let used = usedNeighborColors(node);
+  return [0,1,2,3,4].filter(c => !used.has(c));
+}
+
+function chromaticNumber() {
+  for (let k = 1; k <= 5; k++) {
+    if (canColor(k)) return k;
+  }
+  return 5;
+}
+
+function canColor(k) {
+  return bt(0, new Array(N).fill(-1), k);
+}
+
+function bt(node, cols, k) {
+  if (node === N) return true;
+  for (let c = 0; c < k; c++) {
+    cols[node] = c;
+    let ok = true;
+    for (let [a,b] of edges) {
+      if (a !== b && (a === node || b === node) && cols[a] === cols[b] && cols[a] !== -1) { ok = false; break; }
+    }
+    if (ok && bt(node+1, cols, k)) return true;
+  }
+  cols[node] = -1;
+  return false;
+}
+
+function isValid() {
+  for (let [a,b] of edges) {
+    if (nodeColors[a] === nodeColors[b]) return false;
+  }
+  return true;
+}
+
+function clickNode(i) {
+  let avail = availableColors(i);
+  if (avail.length === 0) {
+    nodeColors[i] = (nodeColors[i] + 1) % 5;
+  } else {
+    let cur = avail.indexOf(nodeColors[i]);
+    nodeColors[i] = avail[(cur + 1) % avail.length];
+  }
+  render();
+}
+
+function render() {
+  const svg = document.getElementById('graph');
+  svg.innerHTML = '';
+
+  // edges
+  for (let [a,b] of edges) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', positions[a].x);
+    line.setAttribute('y1', positions[a].y);
+    line.setAttribute('x2', positions[b].x);
+    line.setAttribute('y2', positions[b].y);
+    line.setAttribute('class','edge-line');
+    svg.appendChild(line);
+  }
+
+  // nodes
+  for (let i = 0; i < N; i++) {
+    const avail = availableColors(i);
+    const ci = nodeColors[i];
+    const col = COLORS[ci >= 0 ? ci : 0].hex;
+    const conflict = usedNeighborColors(i).has(ci);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('onclick', `clickNode(${i})`);
+    g.style.cursor = 'pointer';
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', positions[i].x);
+    circle.setAttribute('cy', positions[i].y);
+    circle.setAttribute('r', i === N-1 ? 28 : 24);
+    circle.setAttribute('fill', col);
+    circle.setAttribute('stroke', conflict ? '#E24B4A' : 'rgba(255,255,255,0.4)');
+    circle.setAttribute('stroke-width', conflict ? '3.5' : '2');
+    circle.setAttribute('class','node-circle');
+    g.appendChild(circle);
+
+    // node id
+    const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x', positions[i].x);
+    lbl.setAttribute('y', positions[i].y - 5);
+    lbl.setAttribute('text-anchor','middle');
+    lbl.setAttribute('dominant-baseline','central');
+    lbl.setAttribute('font-size','12');
+    lbl.setAttribute('font-weight','600');
+    lbl.setAttribute('fill','white');
+    lbl.setAttribute('pointer-events','none');
+    lbl.textContent = `N${i+1}`;
+    g.appendChild(lbl);
+
+    // color name
+    const cname = document.createElementNS('http://www.w3.org/2000/svg','text');
+    cname.setAttribute('x', positions[i].x);
+    cname.setAttribute('y', positions[i].y + 8);
+    cname.setAttribute('text-anchor','middle');
+    cname.setAttribute('dominant-baseline','central');
+    cname.setAttribute('font-size','9');
+    cname.setAttribute('fill','rgba(255,255,255,0.9)');
+    cname.setAttribute('pointer-events','none');
+    cname.textContent = COLORS[ci >= 0 ? ci : 0].name;
+    g.appendChild(cname);
+
+    // badge x/5 — position away from center
+    const dx = positions[i].x - cx;
+    const dy = positions[i].y - cy;
+    const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+    const bx = i === N - 1 ? positions[i].x + 48 : positions[i].x + (dx/dist) * 40;
+    const by = i === N - 1 ? positions[i].y - 2 : positions[i].y + (dy/dist) * 40;
+
+    const badge = document.createElementNS('http://www.w3.org/2000/svg','text');
+    badge.setAttribute('x', bx);
+    badge.setAttribute('y', by);
+    badge.setAttribute('text-anchor','middle');
+    badge.setAttribute('dominant-baseline','central');
+    badge.setAttribute('font-size','11');
+    badge.setAttribute('font-weight','600');
+    badge.setAttribute('fill', avail.length === 0 ? '#E24B4A' : avail.length <= 1 ? '#EF9F27' : '#639922');
+    badge.setAttribute('pointer-events','none');
+    badge.textContent = `${avail.length}/5`;
+    g.appendChild(badge);
+
+    svg.appendChild(g);
+  }
+
+  // update info
+  document.getElementById('edge-count').textContent = edges.length;
+  document.getElementById('chrom-num').textContent = edges.length > 0 ? chromaticNumber() : 1;
+  const v = isValid();
+  const vl = document.getElementById('valid-label');
+  vl.textContent = v ? '✓ Validă' : '✗ Conflict!';
+  vl.style.color = v ? 'var(--color-text-success)' : 'var(--color-text-danger)';
+
+  // legend
+  const leg = document.getElementById('legend');
+  leg.innerHTML = '';
+  COLORS.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const dot = document.createElement('div');
+    dot.className = 'legend-dot';
+    dot.style.background = c.hex;
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(c.name));
+    leg.appendChild(item);
+  });
+}
+
+setMode('min');
+</script>
